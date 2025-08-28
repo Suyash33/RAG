@@ -5,7 +5,7 @@ import { Send, Bot, User, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { ScrollArea } from "@/components/ui/scroll-area";
+// import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
@@ -15,7 +15,7 @@ import { apiClient } from "@/lib/api";
 
 export function ChatInterface() {
   const [input, setInput] = useState("");
-  const scrollAreaRef = useRef<HTMLDivElement>(null);
+  // const scrollAreaRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   
@@ -93,13 +93,12 @@ export function ChatInterface() {
       } else {
         throw new Error(response.error || 'Failed to get response');
       }
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to send message');
-      addMessage({
-        content: "I'm sorry, I encountered an error. Please try again.",
-        isUser: false,
-      });
-    } finally {
+    } catch (error: unknown) {
+  if (error instanceof Error) {
+    toast.error(error.message);
+  } else {
+    toast.error("Failed to send message");
+  } finally {
       setLoading(false);
     }
   };
