@@ -2,7 +2,7 @@
 
 import { useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
-import { Upload, FileText, X, CheckCircle } from "lucide-react";
+import { Upload, FileText, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -57,11 +57,12 @@ export function DocumentUpload() {
         setUploading(false);
       }, 1000);
 
-    } catch (error: any) {
-      toast.error(error.message || 'Upload failed');
-      setUploading(false);
-      setUploadProgress(0);
-    }
+    } catch (error: unknown) {
+  if (error instanceof Error) {
+    toast.error(error.message);
+  } else {
+    toast.error("Upload failed");
+  }
   };
 
   return (
