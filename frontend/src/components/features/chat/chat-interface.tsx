@@ -17,6 +17,7 @@ export function ChatInterface() {
   const [input, setInput] = useState("");
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
   
   const { 
     messages, 
@@ -40,12 +41,25 @@ export function ChatInterface() {
     }
   }, [sessionId, setSessionId]);
 
-  // Auto-scroll to bottom
+  // Auto-scroll to bottom when messages change
   useEffect(() => {
-    if (scrollAreaRef.current) {
-      scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight;
+    if (messagesContainerRef.current) {
+      messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
     }
   }, [messages]);
+
+  // Auto-resize textarea
+  const adjustTextareaHeight = () => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
+    }
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setInput(e.target.value);
+    adjustTextareaHeight();
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -53,6 +67,11 @@ export function ChatInterface() {
 
     const userMessage = input.trim();
     setInput("");
+    
+    // Reset textarea height
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+    }
     
     // Add user message
     addMessage({
@@ -93,8 +112,9 @@ export function ChatInterface() {
   };
 
   return (
-    <Card className="flex flex-col h-[700px] w-full max-w-4xl border-0 shadow-2xl glass-card overflow-hidden">
-      <CardHeader className="pb-3">
+    <Card className="flex flex-col h-[700px] w-full max-w-4xl shadow-lg border">
+      {/* Header */}
+      <CardHeader className="pb-3 border-b">
         <div className="flex items-center space-x-2">
           <Bot className="h-6 w-6 text-primary" />
           <h2 className="text-xl font-semibold">AI Assistant</h2>
@@ -104,11 +124,16 @@ export function ChatInterface() {
         </div>
       </CardHeader>
 
-      <CardContent className="flex-1 flex flex-col p-0">
-        <ScrollArea className="flex-1 px-6" ref={scrollAreaRef}>
-          <div className="space-y-4 pb-4">
+      {/* Messages Container - Fixed height with scroll */}
+      <CardContent className="flex-1 p-0 overflow-hidden">
+        <div 
+          ref={messagesContainerRef}
+          className="h-full overflow-y-auto px-6 py-4 scroll-smooth"
+          style={{ maxHeight: 'calc(700px - 140px)' }} // Adjust based on header/footer
+        >
+          <div className="space-y-4">
             {messages.length === 0 ? (
-              <div className="flex flex-col items-center justify-center h-64 text-center">
+              <div className="flex flex-col items-center justify-center h-96 text-center">
                 <Bot className="h-16 w-16 text-muted-foreground mb-4" />
                 <h3 className="text-lg font-medium mb-2">
                   Welcome to RAG Assistant!
@@ -191,33 +216,35 @@ export function ChatInterface() {
               </div>
             )}
           </div>
-        </ScrollArea>
-
-        <div className="p-6 pt-4 border-t">
-          <form onSubmit={handleSubmit} className="flex space-x-2">
-            <Textarea
-              ref={textareaRef}
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder="Ask me anything about your documents..."
-              className="flex-1 min-h-[44px] max-h-32 resize-none"
-              disabled={isLoading || !sessionId}
-            />
-            <Button 
-              type="submit" 
-              disabled={!input.trim() || isLoading || !sessionId}
-              size="icon"
-              className="h-11 w-11"
-            >
-              <Send className="h-4 w-4" />
-            </Button>
-          </form>
-          <p className="text-xs text-muted-foreground mt-2 text-center">
-            Press Enter to send, Shift+Enter for new line
-          </p>
         </div>
       </CardContent>
+
+      {/* Input Form - Sticky at bottom */}
+      <div className="border-t bg-background p-4">
+        <form onSubmit={handleSubmit} className="flex space-x-2">
+          <Textarea
+            ref={textareaRef}
+            value={input}
+            onChange={handleInputChange}
+            onKeyDown={handleKeyDown}
+            placeholder="Ask me anything about your documents..."
+            className="flex-1 min-h-[44px] max-h-32 resize-none overflow-hidden"
+            disabled={isLoading || !sessionId}
+            rows={1}
+          />
+          <Button 
+            type="submit" 
+            disabled={!input.trim() || isLoading || !sessionId}
+            size="icon"
+            className="h-11 w-11"
+          >
+            <Send className="h-4 w-4" />
+          </Button>
+        </form>
+        <p className="text-xs text-muted-foreground mt-2 text-center">
+          Press Enter to send, Shift+Enter for new line
+        </p>
+      </div>
     </Card>
   );
 }

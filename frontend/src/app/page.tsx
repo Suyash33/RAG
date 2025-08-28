@@ -114,7 +114,7 @@ export default function Home() {
                 <CardContent>
                   <div className="space-y-3 max-h-64 overflow-y-auto custom-scrollbar">
                     {uploadedDocuments.map((doc, index) => (
-                      <div key={doc.id} className="flex items-center justify-between p-4 bg-muted/50 rounded-lg border border-border/50 hover:border-primary/50 transition-colors">
+                      <div key={doc.id || `doc-${index}`} className="flex items-center justify-between p-4 bg-muted/50 rounded-lg border border-border/50 hover:border-primary/50 transition-colors">
                         <div className="flex items-center space-x-3">
                           <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
                             <FileText className="h-5 w-5 text-primary" />
