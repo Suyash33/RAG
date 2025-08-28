@@ -48,7 +48,7 @@ export class ApiClient {
     }
   }
 
-  async uploadDocument(file: File): Promise<any> {
+  async uploadDocument(file: File): Promise<unknown> {
     try {
       const formData = new FormData();
       formData.append('document', file);
